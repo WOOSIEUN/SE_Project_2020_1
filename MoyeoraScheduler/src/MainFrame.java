@@ -10,9 +10,14 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -36,8 +41,9 @@ public class MainFrame extends JFrame implements ActionListener {
 	DefaultTableModel scheduleTableModel;
 	JTable scheduleTable;
 	JScrollPane scheduleScrollPane;
-	// 데이터 검색에 필요한 텍스트필드
-	JTextField searchField;
+	// 데이터 검색
+	JTextField targetStartField, targetEndField;
+	String targetStart, targetEnd;	
 	//버튼
 	JButton search;
 	JButton insert;
@@ -75,7 +81,9 @@ public class MainFrame extends JFrame implements ActionListener {
 		add(tablePanel, BorderLayout.CENTER);
 
 		//DB에서 데이터 읽어오기. 이후에 오늘의 일정만 보이게 수정
-		printTable();
+		targetStart = targetToString(null, true, true);
+		targetEnd = targetToString(null, true, false);
+		printTable(targetStart, targetEnd);
 
 		// JTable에서 컬럼명을 클릭했을때, 데이터 값 정렬
 		scheduleTable.setAutoCreateRowSorter(true);
@@ -93,19 +101,30 @@ public class MainFrame extends JFrame implements ActionListener {
 		// 데이터 삽입에 필요한 Text Field와 안내문구를 넣을 라벨 생성.
 		JLabel searchLabel = new JLabel("   검색   ");
 		searchPanel.add(searchLabel);		
-		searchField = new JTextField("(yyyymmdd) or (yyyymm)");
-		searchPanel.add(searchField);
+		JLabel searchStartLabel = new JLabel("   시작 날짜   ");
+		searchPanel.add(searchStartLabel);
+		targetStartField = new JTextField("(yyyy-mm-dd)");
+		searchPanel.add(targetStartField);
+		JLabel searchEndLabel = new JLabel("   종료 날짜   ");
+		searchPanel.add(searchEndLabel);
+		targetEndField = new JTextField("(yyyy-mm-dd)");
+		searchPanel.add(targetEndField);		
 		add(searchPanel, BorderLayout.NORTH);
 		search = new JButton("검색");
 		search.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("검색")) {
-					//검색파트 필요. printTable이용. 인자로 날짜를 넘겨줌.
+					targetStart = targetStartField.getText();
+					targetEnd = targetEndField.getText();
+					//형식에 맞춰 데이터 변환.
+					targetStart = targetToString(targetStart, false, true);
+					targetEnd = targetToString(targetEnd, false, false);
+					//DB에서 읽어오기
+					printTable(targetStart, targetEnd);
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
 				}
-				//db에서 table 다시 읽어오기
 			}
 		});
 		searchPanel.add(search);
@@ -166,7 +185,6 @@ public class MainFrame extends JFrame implements ActionListener {
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
 				}
-				//db에서 데이터 삭제 & table에서 데이터 삭제해서 db에서 table 다시 읽어오지 않도록 함.
 			}
 		});
 		buttonPanel.add(viewDetails);
@@ -192,9 +210,9 @@ public class MainFrame extends JFrame implements ActionListener {
 	}
 
 	//-------------------------Table의 내용을 DB에서 읽어오는 함수------------------------------------
-	private void printTable() {
+	private void printTable(String start, String end) {
 		String sort;
-		String sql = "SELECT * FROM Schedule";     
+		String sql = "SELECT * FROM Schedule where start_time >= '"+ start +"' AND end_time <= '"+ end +"'";     
 		try{
 			conn = DB.getMySQLConnection();
 			pstmt = conn.prepareStatement(sql);
@@ -228,10 +246,42 @@ public class MainFrame extends JFrame implements ActionListener {
 		}		
 	}
 	
+	private String targetToString(String target, boolean isToday, boolean isStart) {
+		String targetString = null;
+		Date date = new Date();	
+		SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd");
+		
+	    //isToday가 true이면 오늘의 일정를 출력하기를 원함.
+	    //isToday가 false이면 검색한 날짜의 일정을 출력하기를 원함.
+		if (!isToday) {
+			try {
+		        date = dateFormat.parse(target);
+		    } catch (ParseException parseE) {
+		    	JOptionPane.showMessageDialog(null, "올바른 날짜 형식을 입력해주세요.\nYYYY-MM-DD");
+		    	parseE.printStackTrace();
+		    	return null;
+		    }
+		}
+		//date를 String 형식으로 변환
+		targetString = dateFormat.format(date);
+		
+		//isStart이면 시작을 return해야함.
+		//!isStart이면 끝을 return해야함.
+		if(isStart) {
+			targetString = targetString + " 00:00:00";
+		} else {
+			targetString = targetString + " 23:59:59";
+		}		
+		return targetString;
+	}
 
 	private int getSelectedID (int row) {
 			if (row < 0) return -1;
 			else return (int) scheduleTable.getValueAt(row, 0);
+	}
+	
+	private boolean isInBoundary(int target) {
+		if(10000101< target <)
 	}
 
 	public int stringToInt(String string) {
