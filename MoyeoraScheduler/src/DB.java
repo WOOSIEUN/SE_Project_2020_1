@@ -5,12 +5,12 @@ import java.sql.SQLException;
 public class DB {
 	public static Connection getMySQLConnection() {
 		Connection conn = null;
-		//¹Ì¸® »ı¼ºÇØ µĞ AWS RDS DB ÀÎ½ºÅÏ½º¿¡ ¿¬°á
+		//ë¯¸ë¦¬ ìƒì„±í•´ ë‘” AWS RDS DB ì¸ìŠ¤í„´ìŠ¤ì— ì—°ê²°
 		String driver = "com.mysql.cj.jdbc.Driver";
 		String dbURL = "jdbc:mysql://rds-mysql-se-project.ccpr71bawwpc.ap-northeast-2.rds.amazonaws.com/";
 		String dbName = "MOYEORA";
 		String user = "root";
-		String pass = "pw123456"; //commit½Ã ÇØ´çºÎºĞ Ç×»ó »èÁ¦ÇÒ °Í 
+		String pass = ""; //commitì‹œ í•´ë‹¹ë¶€ë¶„ í•­ìƒ ì‚­ì œí•  ê²ƒ 
 		
 		try {
 			Class.forName(driver); 						
