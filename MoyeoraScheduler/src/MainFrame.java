@@ -54,6 +54,8 @@ public class MainFrame extends JFrame implements ActionListener {
 	Connection conn = null;
 	PreparedStatement pstmt = null;
 	ResultSet rs = null;
+	
+	String ID;
 
 	public MainFrame(String ID, String Name, boolean isMaster) {
 		// 프레임 설정
@@ -62,6 +64,8 @@ public class MainFrame extends JFrame implements ActionListener {
 		setLocation(960, 500);
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		
+		this.ID = ID;
 
 		//환영 팝업
 		JOptionPane.showMessageDialog(null, Name + " (" + ID + ") 님 환영합니다!");
@@ -212,13 +216,14 @@ public class MainFrame extends JFrame implements ActionListener {
 	//-------------------------Table의 내용을 DB에서 읽어오는 함수------------------------------------
 	private void printTable(String start, String end) {
 		String sort;
-		String sql = "SELECT * FROM Schedule where start_time >= '"+ start +"' AND end_time <= '"+ end +"'";     
+		String sql = "SELECT * FROM Schedule where start_time >= '"+ start +"' AND end_time <= '"+ end +"' AND (sort != 2 OR author = '"+ this.ID +"')";     
 		try{
 			conn = DB.getMySQLConnection();
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
 
 			//값을 테이블에 추가
+			scheduleTableModel.setNumRows(0);
 			while(rs.next()){
 				if(rs.getInt("sort") == 0) {
 					sort = "공동";
@@ -280,10 +285,6 @@ public class MainFrame extends JFrame implements ActionListener {
 			else return (int) scheduleTable.getValueAt(row, 0);
 	}
 	
-	private boolean isInBoundary(int target) {
-		if(10000101< target <)
-	}
-
 	public int stringToInt(String string) {
 		return Integer.parseInt(string);
 	}
