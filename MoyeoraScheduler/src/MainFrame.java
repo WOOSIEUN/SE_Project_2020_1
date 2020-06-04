@@ -140,7 +140,7 @@ public class MainFrame extends JFrame implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("일정 추가")) {
-					//일정 추가 함수 필요
+					ScheduleFrame SF = new ScheduleFrame(ID, isMaster, true);
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
 				}
