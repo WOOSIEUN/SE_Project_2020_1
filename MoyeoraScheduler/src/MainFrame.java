@@ -140,11 +140,11 @@ public class MainFrame extends JFrame implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("일정 추가")) {
-					ScheduleFrame SF = new ScheduleFrame(ID, isMaster, true);
+					ScheduleFrame SF = new ScheduleFrame(ID, isMaster, true, false, -1, null);
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
 				}
-				//db에서 table 다시 읽어오기
+				printTable(targetStart, targetEnd);
 			}
 		});
 		buttonPanel.add(insert);
@@ -153,11 +153,17 @@ public class MainFrame extends JFrame implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("일정 수정")) {
-					//일정 수정 함수 필요
+					int row = scheduleTable.getSelectedRow();
+					int idSchedule = Integer.valueOf((String) scheduleTable.getValueAt(row, 0));
+					String[] valueSet = new String[4];
+					valueSet[0] = (String)scheduleTable.getValueAt(row,  5);
+					valueSet[1] = (String)scheduleTable.getValueAt(row,  3);
+					valueSet[2] = (String)scheduleTable.getValueAt(row,  4);
+					valueSet[3] = (String)scheduleTable.getValueAt(row,  6);
+					ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, false, idSchedule, valueSet);
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
-				}
-				//db에서 table 다시 읽어오기
+				}				
 			}
 		});
 		buttonPanel.add(modify);
@@ -166,7 +172,8 @@ public class MainFrame extends JFrame implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("일정 삭제")) {
-					//일정 삭제 함수 필요.
+					int row = scheduleTable.getSelectedRow();
+					int idSchedule = Integer.valueOf((String) scheduleTable.getValueAt(row, 0));
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
 				}
@@ -179,12 +186,12 @@ public class MainFrame extends JFrame implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("상세 일정 조회")) {
-					int getID = getSelectedID(scheduleTable.getSelectedRow());
-					if (getID == -1)
+					int row = scheduleTable.getSelectedRow();
+					int idSchedule = Integer.valueOf((String) scheduleTable.getValueAt(row, 0));
+					if (idSchedule == -1)
 						JOptionPane.showMessageDialog(null, "상세 보기를 원하는 열을 선택해주세요.");
-					else {
-						//scheduleDetails viewDetails = new scheduleDetails(getID);
-						//스케쥴 작성 수정 쓰이는 클래스가 필요해서 해당 부분을 맡은 분이 작성하신 후에 기능을 추가하겠습니다.
+					else {						
+						ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, true, idSchedule, null);
 					}
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");

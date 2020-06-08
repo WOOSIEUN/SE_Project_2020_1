@@ -24,6 +24,7 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 	private static final int HEIGHT = 450;
 
 	String ID;
+	String[] valueSet;
 	
 	JPanel panel = new JPanel();
 	JPanel descPanel = new JPanel();
@@ -34,10 +35,10 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 	JLabel startLabel = new JLabel("시작 시간");
 	JLabel endLabel = new JLabel("종료 시간");
 	
-	JTextField title = new JTextField();
-	JTextField start = new JTextField("YYYY-MM-DD hh:mm");
-	JTextField end = new JTextField("YYYY-MM-DD hh:mm");
-	JTextField description = new JTextField();
+	JTextField title;
+	JTextField start;
+	JTextField end;
+	JTextField description;
 	
 	JButton apply = new JButton("등록");
 
@@ -47,15 +48,15 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 	PreparedStatement pstmt = null;
 	int r;
 	
-	public ScheduleFrame(String ID, boolean isMaster, boolean isNew) {
+	public ScheduleFrame(String ID, boolean isMaster, boolean isNew, boolean viewDetails, int idSchedule, String[] valueSet) {
 		this.setSize(WIDTH, HEIGHT);
 		this.setLayout(new BorderLayout());
 		setResizable(false);
-		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setVisible(true);
 		setLocationRelativeTo(null);
 		
 		this.ID = ID;
+		this.valueSet = valueSet;
 		
 		panel.setLayout(new GridLayout(4, 2, 5, 10));
 		panel.setSize(350, 30);
@@ -64,8 +65,12 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				ErrorDetect();
 				if(isNew) addSchedule(isMaster);
-				else modifySchedule(isMaster);
+				else {
+					if(viewDetails) viewDetails(idSchedule);
+					else modifySchedule(isMaster, idSchedule);
+				}			
 				
+				dispose();				
 				return;
 			}
 		});
@@ -75,14 +80,34 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 			this.setTitle("New");
 
 		}else {
-			window(isMaster, false);
-			this.setTitle("Modify");
-
+			if(viewDetails) {
+				window(isMaster, false);
+				this.setTitle("View Details");
+			}
+			else {
+				window(isMaster, false);
+				this.setTitle("Modify");
+			}
 		}
 	}
 	
 	public void window(boolean isMaster, boolean isNew) {
+		if(isNew) {
+			title = new JTextField();
+			start = new JTextField("YYYY-MM-DD hh:mm");
+			end = new JTextField("YYYY-MM-DD hh:mm");
+			description = new JTextField();
+		}else {
+			title = new JTextField(valueSet[0]);
+			start = new JTextField(valueSet[1]);
+			end = new JTextField(valueSet[2]);
+			description = new JTextField(valueSet[3]);
+		}
 		if(isMaster) {
+			title = new JTextField(valueSet[0]);
+			start = new JTextField(valueSet[1]);
+			end = new JTextField(valueSet[2]);
+			description = new JTextField(valueSet[3]);
 
 			panel.add(titleLabel);
 			panel.add(title);
@@ -158,7 +183,85 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 		}
 	}
 	
-	public void modifySchedule(boolean isMaster) {
+	public void modifySchedule(boolean isMaster, int scheID) {
+		String scheTitle = title.getText();
+		String scheStart = start.getText();
+		String scheEnd = end.getText();
+		String scheDescription = description.getText();
+		String scheAuthor;
+		int scheSort;
+		
+		if(isMaster) scheSort = 0;
+		else {
+			if(pub.isSelected()) scheSort = 1;
+			else scheSort = 2;
+		}
+		
+		scheAuthor = ID;
+		
+		String sql = "UPDATE Schedule SET start_time = '" + scheStart + "', end_time = '" + scheEnd + "', title = '" + scheTitle + "', sort = '" + scheSort + "', description = '" + scheDescription + "' WHERE idSchedule = '" + scheID +"';";
+		
+		try {
+			conn = DB.getMySQLConnection();
+			pstmt = conn.prepareStatement(sql);
+			r = pstmt.executeUpdate();
+		}catch(SQLException e) {
+			System.out.println(e.getMessage());
+		}catch(Exception e) {
+			System.out.println(e.getMessage());
+		}finally {
+			try {
+				pstmt.close();
+				conn.close();
+			}catch(Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+	}
+	
+	public void viewDetails(int scheID) {		    
+		ResultSet rs = null;
+		String scheTitle;
+		String scheStart;
+		String scheEnd;
+		String scheDescription;
+		String scheAuthor;
+		String sort;
+		
+		String sql = "SELECT * FROM Schedule WHERE idSchedule = '" + scheID + "'"; 
+		
+		try{
+			conn = DB.getMySQLConnection();
+			pstmt = conn.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			
+			if(rs.getInt("sort") == 0) {
+					sort = "공동";
+				} else {
+					sort = "개인";            		 
+				}            	 
+			scheAuthor = rs.getString("author");
+			scheStart = rs.getString("start_time");
+			scheEnd = rs.getString("end_time");
+			scheTitle = rs.getString("title");
+			scheDescription = rs.getString("description");
+		//예외처리
+		} catch (SQLException e1) {
+			System.out.println(e1.getMessage());
+			e1.printStackTrace();
+		} catch (Exception e1){
+			System.out.println(e1.getMessage());
+			e1.printStackTrace();
+		} finally {
+			try {
+				//객체 해제
+				rs.close(); 
+				pstmt.close(); 
+				conn.close();
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
 	}
 	
 	public void ErrorDetect() {
