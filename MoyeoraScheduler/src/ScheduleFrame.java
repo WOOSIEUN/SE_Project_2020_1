@@ -48,7 +48,7 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 	PreparedStatement pstmt = null;
 	int r;
 
-	public ScheduleFrame(String ID, boolean isMaster, boolean isNew, int idSchedule, String[] valueSet) {
+	public ScheduleFrame(String ID, boolean isMaster, boolean isNew, boolean viewDetails, int idSchedule, String[] valueSet) {
 		this.setSize(WIDTH, HEIGHT);
 		this.setLayout(new BorderLayout());
 		setResizable(false);
@@ -211,7 +211,8 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 			}
 		}
 	}
-
+	
+	
 	public void ErrorDetect() {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd hh:mm");
 		Date temp = new Date();

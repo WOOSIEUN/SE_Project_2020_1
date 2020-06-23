@@ -114,6 +114,8 @@ public class MainFrame extends JFrame implements ActionListener {
 		targetEndField = new JTextField("(yyyy-mm-dd)");
 		searchPanel.add(targetEndField);		
 		add(searchPanel, BorderLayout.NORTH);
+		
+		//-----------------------버튼 생성------------------------------
 		search = new JButton("검색");
 		search.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -140,48 +142,62 @@ public class MainFrame extends JFrame implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("일정 추가")) {
-					ScheduleFrame SF = new ScheduleFrame(ID, isMaster, true, -1, null);
+					ScheduleFrame SF = new ScheduleFrame(ID, isMaster, true, false, -1, null);
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
 				}
-				//db에서 table 다시 읽어오기
+				printTable(targetStart, targetEnd);
 			}
 		});
 		buttonPanel.add(insert);
+		
 		modify = new JButton("일정 수정");
 		modify.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("일정 수정")) {
 					int row = scheduleTable.getSelectedRow();
-					int idSchedule = Integer.valueOf((String) scheduleTable.getValueAt(row, 0));
-					String[] valueSet = new String[5];
-					valueSet[0] = (String)scheduleTable.getValueAt(row,  5);
-					valueSet[1] = (String)scheduleTable.getValueAt(row,  3);
-					valueSet[2] = (String)scheduleTable.getValueAt(row,  4);
-					valueSet[3] = (String)scheduleTable.getValueAt(row,  6);
-					valueSet[4] = (String)scheduleTable.getValueAt(row,  1);
-					ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, idSchedule, valueSet);
+					int idSchedule = getSelectedID(scheduleTable.getSelectedRow());
+					if (idSchedule == -1)
+						JOptionPane.showMessageDialog(null, "수정하기를 원하는 열을 선택해주세요.");
+					else {
+						String[] valueSet = new String[5];
+						valueSet[0] = (String)scheduleTable.getValueAt(row,  5);
+						valueSet[1] = (String)scheduleTable.getValueAt(row,  3);
+						valueSet[2] = (String)scheduleTable.getValueAt(row,  4);
+						valueSet[3] = (String)scheduleTable.getValueAt(row,  6);
+						valueSet[4] = (String)scheduleTable.getValueAt(row,  1);
+						ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, false, idSchedule, valueSet);
+					}					
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
 				}
-				//db에서 table 다시 읽어오기
+				printTable(targetStart, targetEnd);
 			}
 		});
 		buttonPanel.add(modify);
+		
 		delete = new JButton("일정 삭제");
 		delete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("일정 삭제")) {
-					//일정 삭제 함수 필요.
+					int getID = getSelectedID(scheduleTable.getSelectedRow());
+					if (getID == -1)
+						JOptionPane.showMessageDialog(null, "삭제 하기를 원하는 열을 선택해주세요.");
+					else {
+						//테이블에서 데이터 삭제
+						scheduleTableModel.removeRow(scheduleTable.getSelectedRow());
+						//DB에서 데이터 삭제
+						deleteSchedule(getID);
+					}
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
 				}
-				//db에서 데이터 삭제 & table에서 데이터 삭제해서 db에서 table 다시 읽어오지 않도록 함.
 			}
 		});
 		buttonPanel.add(delete);
+		
 		viewDetails = new JButton("상세 일정 조회");
 		viewDetails.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -200,24 +216,10 @@ public class MainFrame extends JFrame implements ActionListener {
 			}
 		});
 		buttonPanel.add(viewDetails);
+		
 		// dataMangementPanel 메인프레임 SOUTH에 추가
 		add(buttonPanel, BorderLayout.SOUTH);
 
-		// 메뉴바 추가
-		JMenu systemMenu = new JMenu("Menu");
-		JMenuItem tempMenuItem = new JMenuItem("temp");
-		systemMenu.add(tempMenuItem);
-		tempMenuItem.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String event = e.getActionCommand();
-				if (event.equals("temp")) {
-					//메뉴
-				}
-			}
-		});			
-		JMenuBar menuBar = new JMenuBar();
-		menuBar.add(systemMenu);
-		setJMenuBar(menuBar);
 		setVisible(true);
 	}
 
@@ -258,6 +260,30 @@ public class MainFrame extends JFrame implements ActionListener {
 			}
 		}		
 	}
+
+	//-------------------------Table의 내용을 DB에서 읽어오는 함수------------------------------------
+		private void deleteSchedule(int ID) {
+			String sql = "DELETE FROM Schedule WHERE idSchedule = '" + ID + "'";     
+			try{
+				conn = DB.getMySQLConnection();
+				pstmt = conn.prepareStatement(sql);
+			} catch (SQLException e) {
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			} catch (Exception e){
+				System.out.println(e.getMessage());
+				e.printStackTrace();
+			} finally {
+				try {
+					//객체 해제
+					rs.close(); 
+					pstmt.close(); 
+					conn.close();
+				} catch (Exception e) {
+					System.out.println(e.getMessage());
+				}
+			}		
+		}
 	
 	private String targetToString(String target, boolean isToday, boolean isStart) {
 		String targetString = null;
@@ -289,8 +315,8 @@ public class MainFrame extends JFrame implements ActionListener {
 	}
 
 	private int getSelectedID (int row) {
-			if (row < 0) return -1;
-			else return (int) scheduleTable.getValueAt(row, 0);
+			if (row < 0) return -1;			
+			else return Integer.valueOf((String) scheduleTable.getValueAt(row, 0));
 	}
 	
 	public int stringToInt(String string) {
@@ -306,7 +332,4 @@ public class MainFrame extends JFrame implements ActionListener {
 		// TODO Auto-generated method stub
 
 	}
-}
-public class MainFrame {
-
 }
