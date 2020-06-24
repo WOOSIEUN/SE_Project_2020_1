@@ -54,7 +54,7 @@ public class MainFrame extends JFrame implements ActionListener {
 	Connection conn = null;
 	PreparedStatement pstmt = null;
 	ResultSet rs = null;
-	
+
 	String ID;
 
 	public MainFrame(String ID, String Name, boolean isMaster) {
@@ -64,7 +64,7 @@ public class MainFrame extends JFrame implements ActionListener {
 		setLocation(960, 500);
 		setResizable(false);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-		
+
 		this.ID = ID;
 
 		//환영 팝업
@@ -114,7 +114,7 @@ public class MainFrame extends JFrame implements ActionListener {
 		targetEndField = new JTextField("(yyyy-mm-dd)");
 		searchPanel.add(targetEndField);		
 		add(searchPanel, BorderLayout.NORTH);
-		
+
 		//-----------------------버튼 생성------------------------------
 		search = new JButton("검색");
 		search.addActionListener(new ActionListener() {
@@ -143,25 +143,24 @@ public class MainFrame extends JFrame implements ActionListener {
 				String event = e.getActionCommand();
 				if (event.equals("일정 추가")) {
 					ScheduleFrame SF = new ScheduleFrame(ID, isMaster, true, false, -1);
+					printTable(targetStart, targetEnd);
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
-				}
-				printTable(targetStart, targetEnd);
+				}				
 			}
 		});
 		buttonPanel.add(insert);
-		
+
 		modify = new JButton("일정 수정");
 		modify.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("일정 수정")) {
-					int row = scheduleTable.getSelectedRow();
-					int idSchedule = getSelectedID(scheduleTable.getSelectedRow());
-					if (idSchedule == -1)
+					int getID = getSelectedID(scheduleTable.getSelectedRow());
+					if (getID == -1)
 						JOptionPane.showMessageDialog(null, "수정하기를 원하는 열을 선택해주세요.");
 					else {
-						ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, false, idSchedule);
+						ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, false, getID);
 					}					
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
@@ -170,7 +169,7 @@ public class MainFrame extends JFrame implements ActionListener {
 			}
 		});
 		buttonPanel.add(modify);
-		
+
 		delete = new JButton("일정 삭제");
 		delete.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -191,7 +190,7 @@ public class MainFrame extends JFrame implements ActionListener {
 			}
 		});
 		buttonPanel.add(delete);
-		
+
 		viewDetails = new JButton("상세 일정 조회");
 		viewDetails.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -201,8 +200,7 @@ public class MainFrame extends JFrame implements ActionListener {
 					if (getID == -1)
 						JOptionPane.showMessageDialog(null, "상세 보기를 원하는 열을 선택해주세요.");
 					else {
-						//scheduleDetails viewDetails = new scheduleDetails(getID);
-						//스케쥴 작성 수정 쓰이는 클래스가 필요해서 해당 부분을 맡은 분이 작성하신 후에 기능을 추가하겠습니다.
+						ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, true, getID);
 					}
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
@@ -210,7 +208,7 @@ public class MainFrame extends JFrame implements ActionListener {
 			}
 		});
 		buttonPanel.add(viewDetails);
-		
+
 		// dataMangementPanel 메인프레임 SOUTH에 추가
 		add(buttonPanel, BorderLayout.SOUTH);
 
@@ -220,7 +218,8 @@ public class MainFrame extends JFrame implements ActionListener {
 	//-------------------------Table의 내용을 DB에서 읽어오는 함수------------------------------------
 	private void printTable(String start, String end) {
 		String sort;
-		String sql = "SELECT * FROM Schedule where start_time >= '"+ start +"' AND end_time <= '"+ end +"' AND (sort != 2 OR author = '"+ this.ID +"')";     
+		String sql = "SELECT * FROM Schedule where (start_time <= '"+ end +"' AND end_time >= '"+ start +"') AND (sort != 2 OR author = '"+ this.ID +"')";
+
 		try{
 			conn = DB.getMySQLConnection();
 			pstmt = conn.prepareStatement(sql);
@@ -255,49 +254,50 @@ public class MainFrame extends JFrame implements ActionListener {
 		}		
 	}
 
-	//-------------------------Table의 내용을 DB에서 읽어오는 함수------------------------------------
-		private void deleteSchedule(int ID) {
-			String sql = "DELETE FROM Schedule WHERE idSchedule = '" + ID + "'";     
-			try{
-				conn = DB.getMySQLConnection();
-				pstmt = conn.prepareStatement(sql);
-			} catch (SQLException e) {
+	//-------------------------DB에서 특정 ID를 가진 값을 삭제하는 함수------------------------------------
+	private void deleteSchedule(int ID) {
+		String sql = "DELETE FROM Schedule WHERE idSchedule = '" + ID + "'";     
+		try{
+			conn = DB.getMySQLConnection();
+			pstmt = conn.prepareStatement(sql);
+			pstmt.executeUpdate(sql);
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e){
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} finally {
+			try {
+				//객체 해제
+				rs.close(); 
+				pstmt.close(); 
+				conn.close();
+			} catch (Exception e) {
 				System.out.println(e.getMessage());
-				e.printStackTrace();
-			} catch (Exception e){
-				System.out.println(e.getMessage());
-				e.printStackTrace();
-			} finally {
-				try {
-					//객체 해제
-					rs.close(); 
-					pstmt.close(); 
-					conn.close();
-				} catch (Exception e) {
-					System.out.println(e.getMessage());
-				}
-			}		
-		}
-	
+			}
+		}		
+	}
+
 	private String targetToString(String target, boolean isToday, boolean isStart) {
 		String targetString = null;
 		Date date = new Date();	
 		SimpleDateFormat dateFormat= new SimpleDateFormat("yyyy-MM-dd");
-		
-	    //isToday가 true이면 오늘의 일정를 출력하기를 원함.
-	    //isToday가 false이면 검색한 날짜의 일정을 출력하기를 원함.
+
+		//isToday가 true이면 오늘의 일정를 출력하기를 원함.
+		//isToday가 false이면 검색한 날짜의 일정을 출력하기를 원함.
 		if (!isToday) {
 			try {
-		        date = dateFormat.parse(target);
-		    } catch (ParseException parseE) {
-		    	JOptionPane.showMessageDialog(null, "올바른 날짜 형식을 입력해주세요.\nYYYY-MM-DD");
-		    	parseE.printStackTrace();
-		    	return null;
-		    }
+				date = dateFormat.parse(target);
+			} catch (ParseException parseE) {
+				JOptionPane.showMessageDialog(null, "올바른 날짜 형식을 입력해주세요.\nYYYY-MM-DD");
+				parseE.printStackTrace();
+				return null;
+			}
 		}
 		//date를 String 형식으로 변환
 		targetString = dateFormat.format(date);
-		
+
 		//isStart이면 시작을 return해야함.
 		//!isStart이면 끝을 return해야함.
 		if(isStart) {
@@ -309,10 +309,10 @@ public class MainFrame extends JFrame implements ActionListener {
 	}
 
 	private int getSelectedID (int row) {
-			if (row < 0) return -1;			
-			else return Integer.valueOf((String) scheduleTable.getValueAt(row, 0));
+		if (row < 0) return -1;			
+		else return Integer.valueOf((String) scheduleTable.getValueAt(row, 0));
 	}
-	
+
 	public int stringToInt(String string) {
 		return Integer.parseInt(string);
 	}
