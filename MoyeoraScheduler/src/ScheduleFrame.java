@@ -228,9 +228,6 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 		String scheAuthor;
 		int scheSort, r;
 
-		String[] valueSet = new String[5];
-		valueSet = getInfo(idSchedule);
-
 		if("공동".equals(pub.getSelectedItem().toString())) {
 			scheSort = 0;
 		}else if("개인 공개".equals(pub.getSelectedItem().toString())){
