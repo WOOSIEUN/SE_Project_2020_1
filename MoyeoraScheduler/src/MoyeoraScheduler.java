@@ -5,7 +5,7 @@ public class MoyeoraScheduler {
 	public static void main(String[] args) {
 		//PropertyManagementSystemDemo 클래스 실행
 		MoyeoraScheduler Moyeora = new MoyeoraScheduler();
-		Moyeora.showMainFrame("ramtk6726", "우시은", false);
+		Moyeora.showMainFrame("cyj_1201", "최유진", false);
 	}
 	
 	//메인프레임 띄우는 메소드

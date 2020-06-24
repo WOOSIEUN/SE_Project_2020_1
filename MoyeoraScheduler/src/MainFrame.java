@@ -142,7 +142,7 @@ public class MainFrame extends JFrame implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				String event = e.getActionCommand();
 				if (event.equals("일정 추가")) {
-					ScheduleFrame SF = new ScheduleFrame(ID, isMaster, true, false, -1, null);
+					ScheduleFrame SF = new ScheduleFrame(ID, isMaster, true, false, -1);
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
 				}
@@ -161,13 +161,7 @@ public class MainFrame extends JFrame implements ActionListener {
 					if (idSchedule == -1)
 						JOptionPane.showMessageDialog(null, "수정하기를 원하는 열을 선택해주세요.");
 					else {
-						String[] valueSet = new String[5];
-						valueSet[0] = (String)scheduleTable.getValueAt(row,  5);
-						valueSet[1] = (String)scheduleTable.getValueAt(row,  3);
-						valueSet[2] = (String)scheduleTable.getValueAt(row,  4);
-						valueSet[3] = (String)scheduleTable.getValueAt(row,  6);
-						valueSet[4] = (String)scheduleTable.getValueAt(row,  1);
-						ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, false, idSchedule, valueSet);
+						ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, false, idSchedule);
 					}					
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
