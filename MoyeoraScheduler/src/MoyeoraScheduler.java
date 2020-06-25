@@ -1,4 +1,3 @@
-
 public class MoyeoraScheduler {
 	MainFrame mainFrame; //메인프레임
 

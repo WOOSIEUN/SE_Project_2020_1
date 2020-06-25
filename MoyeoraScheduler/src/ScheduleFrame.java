@@ -24,6 +24,7 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 
 	String ID;
 	int idSchedule;
+	boolean isNew;
 
 	JPanel panel = new JPanel();
 	JPanel descPanel = new JPanel();
@@ -62,6 +63,7 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 
 		this.ID = ID;
 		this.idSchedule = idSchedule;
+		this.isNew = isNew;
 
 		panel.setLayout(new GridLayout(4, 2, 5, 10));
 		panel.setSize(350, 30);
@@ -91,7 +93,7 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 	}
 
 	public String[] getInfo(int ID, boolean viewDetails) {
-		String[] valueSet = new String[5];
+		String[] valueSet = new String[6];
 		String sql = "SELECT * from Schedule WHERE idSchedule = '" + ID + "'";
 
 		try {
@@ -104,6 +106,7 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 			valueSet[2] = rs.getString("title");
 			valueSet[3] = rs.getString("description");
 			valueSet[4] = Integer.toString(rs.getInt("sort"));
+			valueSet[5] = rs.getString("author");
 			if (viewDetails) { //일정 상세 보기 라벨 설정
 				//작성자 라벨
 				authorLabel = new JLabel("작성자 : " + rs.getString("author"));
@@ -142,7 +145,7 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 			end = new JTextField("YYYY-MM-DD hh:mm");
 			description = new JTextField();
 		}else {
-			String valueSet[] = new String[5];
+			String valueSet[] = new String[6];
 			valueSet = getInfo(idSchedule, viewDetails);
 			title = new JTextField(valueSet[2]);
 			start = new JTextField(valueSet[0]);
@@ -272,6 +275,15 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 			}else if(description.getText().equals("")) {
 				JOptionPane.showMessageDialog(null, "설명을 입력하세요.");
 				return 1;
+			}
+			
+			if(isMaster == false && !(isNew)) {
+				String[] valueSet = new String[6];
+				valueSet = getInfo(idSchedule, false);
+				if(!(ID.equals(valueSet[5]))) {
+					JOptionPane.showMessageDialog(null, "일반 유저는 자신이 등록한 일정만 수정 가능합니다.");
+					return 1;
+				}
 			}
 		}
 		return 0;
