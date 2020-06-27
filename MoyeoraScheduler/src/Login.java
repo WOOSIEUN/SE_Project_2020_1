@@ -37,12 +37,12 @@ public class Login extends JFrame{
 		setLayout(null);
 		setVisible(true);
 		
-		/*j1.addActionListener(new ActionListener() {
+		j1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Register f2 = new Register();
-				f2.setVisible(true);
+				Register gui2 = new Register();
+				gui2.setVisible(true);
 			}
-		});;*/
+		});;
 		
 		j2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e2) {
