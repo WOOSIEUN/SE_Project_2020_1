@@ -5,6 +5,8 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.awt.*;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Register extends JFrame{
 	public Register() {
@@ -25,17 +27,17 @@ public class Register extends JFrame{
 		add(t1);
 		add(t2);
 		add(t3);
-		l1.setBounds(600,300,200,30); //ID
-		l2.setBounds(600,350,200,30); //Password
-		l3.setBounds(600,400,200,30); //Password Check
-		b1.setBounds(550,500,170,30); //Enroll
-		b2.setBounds(750,500,170,30); //Cancel
-		t1.setBounds(700,300,200,30);
-		t2.setBounds(700,350,200,30);
-		t3.setBounds(700,400,200,30);
+		l1.setBounds(250,150,100,15); //ID
+		l2.setBounds(250,175,100,15); //Password
+		l3.setBounds(250,200,100,15); //Password Check
+		b1.setBounds(275,250,85,15); //Enroll
+		b2.setBounds(375,250,85,15); //Cancel
+		t1.setBounds(350,150,100,15);
+		t2.setBounds(350,175,100,15);
+		t3.setBounds(350,200,100,15);
 		DB a = new DB();
 		
-		setSize(1500,1000);
+		setSize(750,500);
 		setTitle("Register");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setLayout(null);
@@ -44,23 +46,23 @@ public class Register extends JFrame{
 		b1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent T) {
 				try {
-					String s1;
+					String s1; //ID
 					s1=t1.getText();
-					String s2, s3;
+					String s2, s3; //Password & Password Check
 					s2=t2.getText();
 					s3=t3.getText();
-					BufferedWriter bos= new BufferedWriter(new FileWriter("ID_List.txt",true));
+					BufferedWriter bos = new BufferedWriter(new FileWriter("ID_List.txt",true));
 					if(s3.equals(s2)) { //비밀번호가 제대로 확인됐을 시
-						System.out.println("Id: "+ s1 + "Pw: "+s2);
-						a.Rinsert(s1,s2); //DB에 ID와 Password 삽입
+						System.out.println("Id: "+ s1 + " " + "Pw: "+s2);
+						//a.Rinsert(s1,s2); //DB에 ID와 Password 삽입
 						JOptionPane.showMessageDialog(null, "Success Register");
-						dispose();
+						dispose(); // Main 화면으로 이동 시 dispose() 삭제 후 새로운 클래스 생성으로 대체
 					}
 					else { //비밀번호를 잘못 입력했을 시
 						JOptionPane.showMessageDialog(null, "Check Password");
 					}
 				}catch(Exception Main) {
-							JOptionPane.showMessageDialog(null, "Failed Register");
+							JOptionPane.showMessageDialog(null, "Failed to Register");
 						}
 					}
 				});
@@ -71,4 +73,10 @@ public class Register extends JFrame{
 					}
 				});
 			}
+	
+		public static void main(String[] args)
+		{
+			Register gui = new Register();
+			gui.setVisible(true);
+		}
 	}
