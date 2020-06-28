@@ -14,7 +14,7 @@ public class DB {
 		String dbURL = "jdbc:mysql://rds-mysql-se-project.ccpr71bawwpc.ap-northeast-2.rds.amazonaws.com/";
 		String dbName = "MOYEORA";
 		String user = "root";
-		String pass = ""; //commit시 해당부분 항상 삭제할 것 
+		String pass = "seproject0626"; //commit시 해당부분 항상 삭제할 것 
 
 		try {
 			Class.forName(driver); 						

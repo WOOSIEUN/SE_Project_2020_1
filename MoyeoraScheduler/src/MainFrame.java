@@ -179,15 +179,15 @@ public class MainFrame extends JFrame implements ActionListener {
 					if (getID == -1)
 						JOptionPane.showMessageDialog(null, "삭제 하기를 원하는 열을 선택해주세요.");
 					else {
-						//마스터유저는 보이는 일정은 일정 삭제 권한 있음.
-						if (isMaster || (scheduleTable.getValueAt(scheduleTable.getSelectedRow(), 2) == ID)) {
+						//조건에 따라 삭제가 불가능 한 경우.
+						if(!ID.equals((String) scheduleTable.getValueAt(scheduleTable.getSelectedRow(), 2)) && !isMaster)
+							JOptionPane.showMessageDialog(null, "삭제 권한이 없습니다.");
+						else {
 							//테이블에서 데이터 삭제
 							scheduleTableModel.removeRow(scheduleTable.getSelectedRow());
 							//DB에서 데이터 삭제
 							deleteSchedule(getID);
-						} else {
-							JOptionPane.showMessageDialog(null, "삭제 권한이 없습니다.");
-						}						
+						}				
 					}
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
