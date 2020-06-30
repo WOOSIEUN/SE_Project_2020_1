@@ -11,7 +11,7 @@ public class Login extends JFrame{
 
 	public String Id;
 	public String Name;
-	boolean ism = false;
+	boolean ism;
 	public Login(){
 		DB a = new DB();
 		JPanel p = new JPanel();
@@ -70,14 +70,19 @@ public class Login extends JFrame{
 
 				if(a.find(s1,pw,s3)) // DB에 담긴 ID와 Password와 내가 입력한 ID와 Password, 이름이 일치하는지 확인해주는 메소드
 				{
+					if(a.ad_find(s1))
+						JOptionPane.showMessageDialog(null, "Can't login with this Id!");
+					else
+					{
 					Id = s1;
 					Name = s3;
 					ism = false;
 					JOptionPane.showMessageDialog(null, "Success Login!");
-					MainFrame gui = new MainFrame(s1, s3, ism); //메인 화면으로 이동
+					MoyeoraScheduler Moyeora = new MoyeoraScheduler();
+					Moyeora.showMainFrame(s1, s3, ism); // 메인 화면 실행
 					System.out.println("Id in Login: "+s1);
-					gui.setVisible(true);
 					dispose();
+					}
 				}
 
 				else
@@ -109,14 +114,14 @@ public class Login extends JFrame{
 						Name = s3;
 						ism = true;
 						JOptionPane.showMessageDialog(null, "Hello, Sir!");
-						MainFrame gui = new MainFrame(s1, s3, ism); //메인 화면으로 이동
+						MoyeoraScheduler Moyeora = new MoyeoraScheduler();
+						Moyeora.showMainFrame(s1, s3, ism); // 메인 화면 실행
 						System.out.println("Id in Login: "+s1);
-						gui.setVisible(true);
 						dispose();
 					}
 					else
 					{
-						JOptionPane.showMessageDialog(null, "This Id is not Admin!");
+						JOptionPane.showMessageDialog(null, "This Id is not Admin's!");
 					}
 				}
 				else
