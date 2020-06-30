@@ -34,9 +34,6 @@ import javax.swing.table.TableRowSorter;
 public class MainFrame extends JFrame implements ActionListener {
 	private static final int WIDTH = 900;
 	private static final int HEIGHT = 500;
-	private int ROW;
-	private static final int COLUMN = 7;
-
 	// Å×ÀÌºí
 	DefaultTableModel scheduleTableModel;
 	JTable scheduleTable;
@@ -316,14 +313,6 @@ public class MainFrame extends JFrame implements ActionListener {
 	private int getSelectedID (int row) {
 		if (row < 0) return -1;			
 		else return Integer.valueOf((String) scheduleTable.getValueAt(row, 0));
-	}
-
-	public int stringToInt(String string) {
-		return Integer.parseInt(string);
-	}
-
-	public String intToString(int integer) {
-		return String.valueOf(integer);
 	}
 
 	@Override

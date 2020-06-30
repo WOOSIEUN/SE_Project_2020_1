@@ -5,15 +5,28 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Arrays;
 
 public class Login extends JFrame{
 
+	private MoyeoraScheduler Moyeora;
+	//DB 작업에 필요한 객체
+	Connection conn = null;
+	Statement stmt = null;
+	PreparedStatement pstmt = null;
+	ResultSet rs = null;
+	public String IDarr[] = new String[20], PasswordArr[] = new String[20], NameArr[] = new String[20];
+	public boolean AdminArr[] = new boolean[20];
 	public String Id;
 	public String Name;
 	boolean ism;
 	public Login(){
-		DB a = new DB();
 		JPanel p = new JPanel();
 		JButton j1 = new JButton("Register");
 		JButton j2 = new JButton("Login");
@@ -47,14 +60,13 @@ public class Login extends JFrame{
 		setSize(750,500);
 		setLayout(null);
 		setVisible(true);
-		
+
 		j1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Register gui2 = new Register();
-				gui2.setVisible(true);
+				Moyeora.showRegisterFrame();// 회원가입창 띄우기
 			}
 		});;
-		
+
 		j2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e2) {
 				String s1, s3;
@@ -63,25 +75,21 @@ public class Login extends JFrame{
 				s1=t1.getText();
 				s2=t2.getPassword();
 				s3=t3.getText();
-					
+
 				for(char cha : s2) {
 					pw += Character.toString(cha);
 				}
 
-				if(a.find(s1,pw,s3)) // DB에 담긴 ID와 Password와 내가 입력한 ID와 Password, 이름이 일치하는지 확인해주는 메소드
+				if(find(s1,pw,s3)) // DB에 담긴 ID와 Password와 내가 입력한 ID와 Password, 이름이 일치하는지 확인해주는 메소드
 				{
-					if(a.ad_find(s1))
+					if(ad_find(s1))
 						JOptionPane.showMessageDialog(null, "Can't login with this Id!");
 					else
 					{
-					Id = s1;
-					Name = s3;
-					ism = false;
-					JOptionPane.showMessageDialog(null, "Success Login!");
-					MoyeoraScheduler Moyeora = new MoyeoraScheduler();
-					Moyeora.showMainFrame(s1, s3, ism); // 메인 화면 실행
-					System.out.println("Id in Login: "+s1);
-					dispose();
+						Id = s1;
+						Name = s3;
+						ism = false;
+						Moyeora.showMainFrame(s1, s3, ism);
 					}
 				}
 
@@ -91,7 +99,7 @@ public class Login extends JFrame{
 				}		
 			}
 		});
-		
+
 		j3.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e3) {
 				String s1, s3; 
@@ -100,15 +108,15 @@ public class Login extends JFrame{
 				s1=(String) t1.getText();
 				s2=t2.getPassword();
 				s3=t3.getText();
-				
+
 				for(char cha : s2) {
 					Character.toString(cha);
 					ad += (ad.equals(""))?""+cha+"":""+cha+"";
 				}
 
-				if(a.find(s1,ad,s3))
+				if(find(s1,ad,s3))
 				{
-					if(a.ad_find(s1))
+					if(ad_find(s1))
 					{
 						Id = s1;
 						Name = s3;
@@ -130,17 +138,109 @@ public class Login extends JFrame{
 				}
 			}
 		});
+		setVisible(true);
 	}
 
-	public String getId()
+	public boolean find(String _Id, String _Password, String _Name)
+	// For login
 	{
-		return Id;
+		int i;
+		Rselect();
+
+		for(i=0; i<20; i++)
+		{
+			if(IDarr[i]==null)
+				break;
+			if(PasswordArr[i]==null)
+				break;
+			if(NameArr[i]==null)
+				break;
+			// if Id or password is null stop
+			if(_Id.equals(IDarr[i]))
+				if(_Password.equals(PasswordArr[i]))
+					if(_Name.equals(NameArr[i]))
+						return true;
+		}
+		return false;
 	}
 
-	public static void main(String[] args)
+	public void Rselect()
+	// Select Data from Register
 	{
-		Login gui = new Login();
-		gui.setVisible(true);
+		int i=0;		
+		String sql = "SELECT * FROM User;";
+		try{
+			conn = DB.getMySQLConnection();
+			System.out.println("Connection Success");
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(sql);
+
+			while(rs.next()) {
+				IDarr[i] = rs.getString(1);
+				PasswordArr[i] = rs.getString(2);
+				AdminArr[i] = rs.getBoolean(3);
+				NameArr[i] = rs.getString(4);
+				i++;
+			}
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e){
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} finally {
+			try {
+				//객체 해제
+				rs.close(); 
+				pstmt.close(); 
+				conn.close();
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+	}
+
+	public boolean ad_find(String _Id)
+	// confirm administrator id
+	{
+		boolean isMaster;
+		int i=0;
+		String sql = "SELECT Master FROM User where Id = "+ "'"+_Id +"'" +";";
+		try{
+			conn = DB.getMySQLConnection();
+			System.out.println("Connection Success");
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(sql);
+
+			while(rs.next()) {
+				isMaster=rs.getBoolean(1);
+				if(isMaster==true)
+					return true; // this id is administrator's
+			}
+
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e){
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} finally {
+			try {
+				//객체 해제
+				rs.close(); 
+				pstmt.close(); 
+				conn.close();
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+		return false; // this id isn't administrator's
+	}
+
+	//MoyeoraScheduler와 연동
+	public void setMain(MoyeoraScheduler Moyeora) {
+		this.Moyeora = Moyeora;
 	}
 
 }

@@ -5,10 +5,19 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.awt.*;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Register extends JFrame{
+	//DB 작업에 필요한 객체
+	Connection conn = null;
+	PreparedStatement pstmt = null;
+	ResultSet rs = null;
 	public Register() {
 		JPanel p = new JPanel();
 		JLabel l1 = new JLabel("ID");
@@ -41,8 +50,7 @@ public class Register extends JFrame{
 		t2.setBounds(350,175,100,15);
 		t3.setBounds(350,200,100,15);
 		t4.setBounds(350,225,100,15);
-		DB a = new DB();
-		
+
 		setSize(750,500);
 		setTitle("Register");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
@@ -61,7 +69,7 @@ public class Register extends JFrame{
 					BufferedWriter bos = new BufferedWriter(new FileWriter("ID_List.txt",true));
 					if(s3.equals(s2)) { //비밀번호가 제대로 확인됐을 시
 						System.out.println("Id: "+ s1 + " " + "Pw: "+s2);
-						a.Rinsert(s1,s2,n); //DB에 ID와 Password 삽입
+						Rinsert(s1,s2,n); //DB에 ID와 Password 삽입
 						JOptionPane.showMessageDialog(null, "Success Register");
 						dispose(); // Main 화면으로 이동 시 dispose() 삭제 후 새로운 클래스 생성으로 대체
 					}
@@ -69,21 +77,57 @@ public class Register extends JFrame{
 						JOptionPane.showMessageDialog(null, "Check Password");
 					}
 				}catch(Exception Main) {
-							JOptionPane.showMessageDialog(null, "Failed to Register");
-						}
-					}
-				});
-				b2.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent T2) {
-						JOptionPane.showMessageDialog(null, "Cancelled");
-						dispose();
-					}
-				});
+					JOptionPane.showMessageDialog(null, "Failed to Register");
+				}
 			}
-	
-		public static void main(String[] args)
-		{
-			Register gui = new Register();
-			gui.setVisible(true);
-		}
+		});
+		b2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent T2) {
+				JOptionPane.showMessageDialog(null, "Cancelled");
+				dispose();
+			}
+		});
 	}
+
+	public void Rinsert(String _Id, String _password, String _name)
+	// input data after register for login 
+	{
+		boolean admin = false;
+
+		String sql = "INSERT INTO User VALUES (?, ?, ?, ?)";   
+		try{
+			conn = DB.getMySQLConnection();
+			System.out.println("Connection Success");
+			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, _Id);
+			pstmt.setString(2, _password);
+			pstmt.setBoolean(3, admin);
+			pstmt.setString(4, _name);
+
+			int count = pstmt.executeUpdate();
+
+			if(count==0) {
+				System.out.println("Failed to input data");
+			}
+			else {
+				System.out.println("Data input success");
+			}
+			
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e){
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} finally {
+			try {
+				//객체 해제
+				rs.close(); 
+				pstmt.close(); 
+				conn.close();
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
+	}		
+}
