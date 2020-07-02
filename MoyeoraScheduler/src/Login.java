@@ -14,7 +14,6 @@ import java.sql.Statement;
 import java.util.Arrays;
 
 public class Login extends JFrame{
-
 	private MoyeoraScheduler Moyeora;
 	//DB 작업에 필요한 객체
 	Connection conn = null;
@@ -25,56 +24,64 @@ public class Login extends JFrame{
 	public boolean AdminArr[] = new boolean[20];
 	public String Id;
 	public String Name;
+	public String MasterCode = "StartWithAdmin";
 	boolean ism;
 	public Login(){
 		JPanel p = new JPanel();
-		JButton j1 = new JButton("Register");
-		JButton j2 = new JButton("Login");
-		JButton j3 = new JButton("Admin");
+		JButton b1 = new JButton("Register");
+		JButton b2 = new JButton("Login");
 		JTextField t1 = new JTextField();
 		JPasswordField t2 = new JPasswordField();
 		JTextField t3 = new JTextField();
+		JTextField t4 = new JTextField();
 		JLabel l0 = new JLabel("Welcome To Moyeora Scheduler");
 		JLabel l1 = new JLabel("ID");
 		JLabel l2 = new JLabel("Password");
 		JLabel l3 = new JLabel("Name");
-		l0.setBounds(100,50,100,100);//제목
-		j1.setBounds(360,250,90,20); //회원가입
-		j2.setBounds(360,225,90,20); //로그인
-		j3.setBounds(360,275,90,20); //관리자 전용 로그인
+		JLabel l4 = new JLabel("MasterCode");
+		l0.setBounds(200,50,375,50); //제목
+		l0.setHorizontalAlignment(JLabel.CENTER);
+		l0.setFont(new Font("Ariel",Font.BOLD,20));
+		b1.setBounds(360,275,90,20); //회원가입
+		b2.setBounds(360,250,90,20); //로그인
 		t1.setBounds(350,150,100,15); //아이디칸
 		t2.setBounds(350,175,100,15); //비밀번호칸
 		t3.setBounds(350,200,100,15); //이름칸
+		t4.setBounds(350,225,100,15); //마스터코드칸
 		l1.setBounds(280,150,75,15); //아이디
 		l2.setBounds(280,175,75,15); //비밀번호
 		l3.setBounds(280,200,75,15); //이름
-		add(j1);
-		add(j2);
-		add(j3);
+		l4.setBounds(280,225,75,15); //마스터코드
+		add(b1);
+		add(b2);
 		add(t1);
 		add(t2);
 		add(t3);
+		add(t4);
+		add(l0);
 		add(l1);
 		add(l2);
 		add(l3);
+		add(l4);
 		setSize(750,500);
 		setLayout(null);
 		setVisible(true);
 
-		j1.addActionListener(new ActionListener() {
+		b1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				Moyeora.showRegisterFrame();// 회원가입창 띄우기
 			}
 		});;
 
-		j2.addActionListener(new ActionListener() {
+		b2.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e2) {
-				String s1, s3;
+				String s1, s3, s4;
 				String pw = "";
 				char[] s2 = new char[20];
 				s1=t1.getText();
 				s2=t2.getPassword();
 				s3=t3.getText();
+				s4=t4.getText();
 
 				for(char cha : s2) {
 					pw += Character.toString(cha);
@@ -82,63 +89,30 @@ public class Login extends JFrame{
 
 				if(find(s1,pw,s3)) // DB에 담긴 ID와 Password와 내가 입력한 ID와 Password, 이름이 일치하는지 확인해주는 메소드
 				{
-					if(ad_find(s1))
-						JOptionPane.showMessageDialog(null, "Can't login with this Id!");
-					else
-					{
-						Id = s1;
-						Name = s3;
-						ism = false;
+					if(MasterCode.equals(s4)) {
+						ad_assign(s1);
+						ism = true;
+						JOptionPane.showMessageDialog(null, "Hello, Sir!");
 						Moyeora.showMainFrame(s1, s3, ism);
 					}
+					else if(s4.equals(""))
+					{
+						no_assign(s1);
+						ism = false;
+						JOptionPane.showMessageDialog(null, "Success Login!");
+						Moyeora.showMainFrame(s1, s3, ism);
+					}
+					else
+					{
+						JOptionPane.showMessageDialog(null, "Wrong Master Code");
+					}	
 				}
-
 				else
 				{
 					JOptionPane.showMessageDialog(null, "Wrong ID or Password or Name");
 				}		
 			}
 		});
-
-		j3.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e3) {
-				String s1, s3; 
-				char[] s2 = new char[20];
-				String ad = "";
-				s1=(String) t1.getText();
-				s2=t2.getPassword();
-				s3=t3.getText();
-
-				for(char cha : s2) {
-					Character.toString(cha);
-					ad += (ad.equals(""))?""+cha+"":""+cha+"";
-				}
-
-				if(find(s1,ad,s3))
-				{
-					if(ad_find(s1))
-					{
-						Id = s1;
-						Name = s3;
-						ism = true;
-						JOptionPane.showMessageDialog(null, "Hello, Sir!");
-						MoyeoraScheduler Moyeora = new MoyeoraScheduler();
-						Moyeora.showMainFrame(s1, s3, ism); // 메인 화면 실행
-						System.out.println("Id in Login: "+s1);
-						dispose();
-					}
-					else
-					{
-						JOptionPane.showMessageDialog(null, "This Id is not Admin's!");
-					}
-				}
-				else
-				{
-					JOptionPane.showMessageDialog(null, "Wrong ID or Password or Name");
-				}
-			}
-		});
-		setVisible(true);
 	}
 
 	public boolean find(String _Id, String _Password, String _Name)
@@ -201,24 +175,15 @@ public class Login extends JFrame{
 		}
 	}
 
-	public boolean ad_find(String _Id)
-	// confirm administrator id
+	public void ad_assign(String _Id)
+	// if login with master code, that id becomes administrator id
 	{
-		boolean isMaster;
-		int i=0;
-		String sql = "SELECT Master FROM User where Id = "+ "'"+_Id +"'" +";";
+		String sql = "UPDATE User SET isMaster = '1' WHERE ID = "+ "'"+_Id +"'" +";";
 		try{
 			conn = DB.getMySQLConnection();
 			System.out.println("Connection Success");
-			stmt = conn.createStatement();
-			rs = stmt.executeQuery(sql);
-
-			while(rs.next()) {
-				isMaster=rs.getBoolean(1);
-				if(isMaster==true)
-					return true; // this id is administrator's
-			}
-
+			pstmt = conn.prepareStatement(sql);
+			pstmt.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 			e.printStackTrace();
@@ -235,7 +200,33 @@ public class Login extends JFrame{
 				System.out.println(e.getMessage());
 			}
 		}
-		return false; // this id isn't administrator's
+	}
+	
+	public void no_assign(String _Id)
+	// if login with master code, that id becomes administrator id
+	{
+		String sql = "UPDATE User SET isMaster = '0' WHERE ID = "+ "'"+_Id +"'" +";";
+		try{
+			conn = DB.getMySQLConnection();
+			System.out.println("Connection Success");
+			pstmt = conn.prepareStatement(sql);
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e){
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} finally {
+			try {
+				//객체 해제
+				rs.close(); 
+				pstmt.close(); 
+				conn.close();
+			} catch (Exception e) {
+				System.out.println(e.getMessage());
+			}
+		}
 	}
 
 	//MoyeoraScheduler와 연동
