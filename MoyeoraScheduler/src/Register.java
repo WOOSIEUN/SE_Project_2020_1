@@ -1,6 +1,5 @@
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.awt.*;
@@ -14,10 +13,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Register extends JFrame{
+	
+	private MoyeoraScheduler Moyeora;
 	//DB 작업에 필요한 객체
 	Connection conn = null;
 	PreparedStatement pstmt = null;
 	ResultSet rs = null;
+	boolean admin = false;
 	public Register() {
 		JPanel p = new JPanel();
 		JLabel l1 = new JLabel("ID");
@@ -29,7 +31,7 @@ public class Register extends JFrame{
 		add(l1);
 		add(l2);
 		add(l3);
-		add(l4);
+		add(l4);			
 		add(b1);
 		add(b2);
 		JTextField t1 = new JTextField();
@@ -44,8 +46,8 @@ public class Register extends JFrame{
 		l2.setBounds(250,175,100,15); //Password
 		l3.setBounds(250,200,100,15); //Password Check
 		l4.setBounds(250,225,100,15); //Name
-		b1.setBounds(275,250,85,15); //Enroll
-		b2.setBounds(375,250,85,15); //Cancel
+		b1.setBounds(275,275,85,15); //Enroll
+		b2.setBounds(375,275,85,15); //Cancel
 		t1.setBounds(350,150,100,15);
 		t2.setBounds(350,175,100,15);
 		t3.setBounds(350,200,100,15);
@@ -92,8 +94,6 @@ public class Register extends JFrame{
 	public void Rinsert(String _Id, String _password, String _name)
 	// input data after register for login 
 	{
-		boolean admin = false;
-
 		String sql = "INSERT INTO User VALUES (?, ?, ?, ?)";   
 		try{
 			conn = DB.getMySQLConnection();
@@ -130,4 +130,5 @@ public class Register extends JFrame{
 			}
 		}
 	}		
+	
 }
