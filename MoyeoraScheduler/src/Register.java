@@ -24,12 +24,16 @@ public class Register extends JFrame{
 	public String IDarr;
 	boolean admin = false;
 	public Register() {
+		setSize(750,450);
+		setLocation(960, 500);
+		setResizable(false);
+		
 		JPanel p = new JPanel();
 		JLabel l1 = new JLabel("ID");
 		JLabel l2 = new JLabel("Password");
 		JLabel l3 = new JLabel("Password Check");
 		JLabel l4 = new JLabel("Name");
-		JButton b0 = new JButton("중복확인");
+		JButton b0 = new JButton("Check!");
 		JButton b1 = new JButton("Register");
 		JButton b2 = new JButton("Cancel");
 		add(l1);
@@ -58,8 +62,7 @@ public class Register extends JFrame{
 		t2.setBounds(350,175,100,15);
 		t3.setBounds(350,200,100,15);
 		t4.setBounds(350,225,100,15);
-
-		setSize(750,500);
+		
 		setTitle("Register");
 		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		setLayout(null);

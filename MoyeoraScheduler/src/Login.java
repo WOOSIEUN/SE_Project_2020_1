@@ -27,6 +27,10 @@ public class Login extends JFrame{
 	public String MasterCode = "StartWithAdmin";
 	boolean ism;
 	public Login(){
+		setSize(750,450);
+		setLocation(960, 500);
+		setResizable(false);
+		
 		JPanel p = new JPanel();
 		JButton b1 = new JButton("Register");
 		JButton b2 = new JButton("Login");
@@ -63,7 +67,6 @@ public class Login extends JFrame{
 		add(l2);
 		add(l3);
 		add(l4);
-		setSize(750,500);
 		setLayout(null);
 		setVisible(true);
 

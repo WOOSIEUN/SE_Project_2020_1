@@ -72,7 +72,7 @@ public class MainFrame extends JFrame implements ActionListener {
 		tablePanel.setLayout(new GridLayout(1, 2));
 
 		// 테이블 만들기 - 헤더와 데이터 불러올 배열 만들기
-		String tableHeader[] = { "ID", "일정 분류", "작성자", "시작 시간", "종료 시간", "일정 제목", "일정 내용" };
+		String tableHeader[] = { "ID", "일정 분류", "작성자", "시작 시간", "종료 시간", "일정 제목"};
 
 		// 테이블 만들기
 		scheduleTableModel = new DefaultTableModel(null, tableHeader);
@@ -157,7 +157,12 @@ public class MainFrame extends JFrame implements ActionListener {
 					if (getID == -1)
 						JOptionPane.showMessageDialog(null, "수정하기를 원하는 열을 선택해주세요.");
 					else {
-						ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, false, getID);
+						//조건에 따라 수정이 불가능 한 경우.
+						if(!ID.equals((String) scheduleTable.getValueAt(scheduleTable.getSelectedRow(), 2)) && !isMaster)
+							JOptionPane.showMessageDialog(null, "수정 권한이 없습니다.");
+						else {
+							ScheduleFrame SF = new ScheduleFrame(ID, isMaster, false, false, getID);
+						}			
 					}					
 				} else {
 					JOptionPane.showMessageDialog(null, "예상치 못한 에러 발생. 관리자에게 문의하세요.");
@@ -235,7 +240,7 @@ public class MainFrame extends JFrame implements ActionListener {
 				} else {
 					sort = "개인";            		 
 				}            	 
-				scheduleTableModel.addRow(new Object[]{rs.getString("idSchedule"), sort, rs.getString("author"), rs.getString("start_time"), rs.getString("end_time"), rs.getString("title"), rs.getString("description")});
+				scheduleTableModel.addRow(new Object[]{rs.getString("idSchedule"), sort, rs.getString("author"), rs.getString("start_time"), rs.getString("end_time"), rs.getString("title")});
 			}
 			//예외처리
 		} catch (SQLException e) {
