@@ -268,6 +268,7 @@ public class ScheduleFrame extends JFrame implements ActionListener {
 			temp = format.parse(end.getText());
 		}catch(ParseException e) {
 			JOptionPane.showMessageDialog(null, "날짜 형식이 맞지 않습니다.");
+			return 1;
 		}finally {
 			if(title.getText().equals("")) {
 				JOptionPane.showMessageDialog(null, "제목을 입력하세요.");
